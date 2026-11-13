@@ -1,0 +1,219 @@
+<!DOCTYPE html><html lang="ht"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Boutik POS</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;800&display=swap">
+<style>
+:root{--bg:#f3f5f9;--card:#fff;--ink:#14202b;--mut:#5d6b7c;--pri:#0b3d91;--on:#fff;--acc:#d21034;--bd:#dde3ec;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0e1620;--card:#17222f;--ink:#e8eef5;--mut:#9aa8b9;--pri:#7aa8ff;--on:#0e1620;--acc:#ff6b81;--bd:#27364a}}
+*{box-sizing:border-box}body{margin:0;font:16px/1.4 "Nunito Sans","Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+header{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--pri);color:var(--on)}header b{font-size:19px;font-weight:800}
+nav{display:flex;gap:6px;overflow-x:auto;padding:8px;background:var(--card);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:5}
+nav button{flex:0 0 auto;min-height:46px;padding:0 16px;border:0;border-radius:10px;background:none;color:var(--ink);font-weight:600;font-size:15px;font-family:inherit}nav button.on{background:var(--pri);color:var(--on)}
+main{padding:12px;max-width:1100px;margin:auto}h3{margin:0 0 10px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:12px}
+.g{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}.f{display:grid;gap:8px}
+.st span{color:var(--mut);font-size:13px}.st b{display:block;font-size:20px;font-weight:800}
+button{font-family:inherit}.b{min-height:46px;padding:0 16px;border:0;border-radius:10px;background:var(--pri);color:var(--on);font-weight:700;font-size:15px;cursor:pointer}.o{background:none;border:1px solid var(--bd);color:var(--ink)}.r{background:var(--acc);color:#fff}
+input,select,textarea{width:100%;min-height:46px;padding:8px 10px;border:1px solid var(--bd);border-radius:8px;background:var(--card);color:var(--ink);font:inherit}label{font-size:13px;color:var(--mut)}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:8px 6px;border-bottom:1px solid var(--bd);text-align:left}.sc{overflow-x:auto}
+.pos{display:grid;gap:12px;grid-template-columns:1fr}@media(min-width:800px){.pos{grid-template-columns:1.4fr 1fr}}
+.pg{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));max-height:60vh;overflow:auto}
+.pi{padding:10px;border:1px solid var(--bd);border-radius:10px;background:var(--card);color:var(--ink);text-align:left;cursor:pointer;font:inherit;min-height:80px}.pi:disabled{opacity:.4}
+.bars{display:flex;align-items:flex-end;gap:6px;height:130px}.bars div{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;font-size:11px;color:var(--mut)}.bars i{display:block;width:100%;background:var(--pri);border-radius:4px 4px 0 0;min-height:2px}
+.hb{display:flex;align-items:center;gap:8px;margin:4px 0;font-size:14px}.hb i{height:14px;background:var(--acc);border-radius:4px}
+#modal{position:fixed;inset:0;background:#0009;display:none;align-items:flex-start;justify-content:center;overflow:auto;padding:16px;z-index:20}#modal>div{background:var(--card);border-radius:14px;padding:16px;width:100%;max-width:440px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;display:none;z-index:30}
+.rc{font-family:ui-monospace,Menlo,monospace;font-size:14px}.rc hr{border:0;border-top:1px dashed var(--mut)}.row{display:flex;justify-content:space-between;gap:8px}.lo{color:var(--acc);font-weight:700}
+@media print{body *{visibility:hidden}#rcpt,#rcpt *{visibility:visible}#rcpt{position:absolute;left:0;top:0;width:100%;color:#000}}
+</style></head><body>
+<header><b id=hn></b><button class="b o" id=lg onclick=tl() style="color:var(--on);border-color:currentColor;min-height:40px"></button></header>
+<nav id=nav></nav><main id=app></main><div id=modal onclick="if(event.target==this)X()"></div><div id=toast></div>
+<script>
+const D=`dash|Tablo|Tableau de bord
+pos|Vant|Vente
+prod|Pwodwi|Produits
+stk|Stòk|Stock
+his|Istwa|Historique
+rep|Rapò|Rapports
+exp|Depans|Dépenses
+set|Paramèt|Paramètres
+td|Vant jodi a|Ventes du jour
+wk|Vant semèn nan|Ventes de la semaine
+mo|Vant mwa a|Ventes du mois
+rev|Revni total|Revenu total
+expt|Total depans|Total dépenses
+pr|Pwofi nèt|Bénéfice net
+np|Pwodwi nan stòk|Produits en stock
+lw|Stòk ba|Stock bas
+oo|Epwize|En rupture
+tx|Tranzaksyon|Transactions
+dd|Vant chak jou|Ventes par jour
+dw|Vant chak semèn|Ventes par semaine
+dm|Vant chak mwa|Ventes par mois
+best|Pi bon vant yo|Meilleures ventes
+srch|Chèche pa non oswa kòd|Rechercher par nom ou code
+empty|Panye a vid|Panier vide
+sub|Sou-total|Sous-total
+disc|Rabè|Remise
+tot|Total|Total
+pay|Peman|Paiement
+rcv|Lajan resevwa|Montant reçu
+chg|Lajan retounen|Monnaie rendue
+ok|Konfime vant lan|Confirmer la vente
+other|Lòt|Autre
+rcn|Resi no|Reçu n°
+print|Enprime|Imprimer
+share|Pataje|Partager
+nw|Nouvo vant|Nouvelle vente
+thx|Mèsi, a la pwochèn!|Merci, à bientôt !
+add|Ajoute pwodwi|Ajouter un produit
+edit|Modifye|Modifier
+del|Efase|Supprimer
+cancel|Anile|Annuler
+save|Anrejistre|Enregistrer
+name|Non|Nom
+code|Kòd (SKU)|Code (SKU)
+cat|Kategori|Catégorie
+buy|Pri acha|Prix d'achat
+sell|Pri vant|Prix de vente
+init|Stòk inisyal|Stock initial
+qty|Kantite|Quantité
+cur|Stòk aktyèl|Stock actuel
+min|Alèt stòk minimòm|Alerte stock minimum
+val|Valè stòk|Valeur du stock
+acha|Acha stòk|Achat de stock
+adj|Ajisteman (+/−)|Ajustement (+/−)
+inisyal|Stòk inisyal|Stock initial
+vant|Vant|Vente
+mv|Mouvman stòk|Mouvements de stock
+note|Nòt|Note
+date|Dat|Date
+rno|Nimewo resi|N° de reçu
+prof|Pwofi|Profit
+day|Jou|Jour
+week|Semèn|Semaine
+month|Mwa|Mois
+cost|Kòst acha pwodwi vann yo|Coût d'achat des produits vendus
+gross|Pwofi brit|Bénéfice brut
+sales|Vant nèt|Ventes nettes
+transp|Transpò|Transport
+elec|Elektrisite|Électricité
+rent|Lwaye|Loyer
+sal|Salè anplwaye|Salaires
+amt|Montan|Montant
+sname|Non magazen|Nom du magasin
+addr|Adrès|Adresse
+tel|Telefòn|Téléphone
+cu|Lajan|Devise
+lang|Lang|Langue
+lowt|Alèt stòk ba pa defo|Seuil d'alerte stock bas (défaut)
+bk|Sovgad done yo|Sauvegarder les données
+rs|Restore done|Restaurer
+copy|Kopye|Copier
+wipe|Efase tout done yo|Effacer toutes les données
+wipeq|Tout pwodwi, vant ak depans yo pral efase. Kontinye?|Tous les produits, ventes et dépenses seront supprimés. Continuer ?
+delq|Efase eleman sa a?|Supprimer cet élément ?
+e_empty|Panye a vid|Panier vide
+e_qty|Kantite pa valab|Quantité invalide
+e_stock|Stòk pa sifi|Stock insuffisant
+e_disc|Rabè pa valab|Remise invalide
+e_rec|Lajan resevwa pa sifi|Montant reçu insuffisant
+e_price|Pri pa valab|Prix invalide
+e_code|Kòd sa a deja egziste|Ce code existe déjà
+none|Pa gen anyen|Aucun résultat`;
+const T=Object.fromEntries(D.split('\n').map(l=>{const a=l.split('|');return[a[0],[a[1],a[2]]]}));
+const K='boutik_pos_v1',NAV=['dash','pos','prod','stk','his','rep','exp','set'],$=i=>document.getElementById(i),p2=n=>String(n).padStart(2,'0');
+const ld=d=>{d=new Date(d);return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())};
+let S,V='dash',C={it:[],disc:0,pay:'Cash',rec:''},Q='',Q2='',H={no:'',d:''},RP='day',A;
+const t=k=>{const a=T[k];return a?a[S.s.lang=='fr'?1:0]:k};
+const f=n=>(+n||0).toLocaleString('fr-FR',{maximumFractionDigits:2})+' '+S.s.cur;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const sum=(a,fn)=>a.reduce((s,x)=>s+fn(x),0),pl_=p=>p=='Other'?t('other'):p;
+const fl=(i,k,v,ty='text',x='')=>`<label>${t(k)}<input id=${i} type=${ty} value="${esc(v)}" ${x}></label>`;
+function toast(m){const e=$('toast');e.textContent=m;e.style.display='block';setTimeout(()=>e.style.display='none',2600)}
+function M(h){$('modal').innerHTML='<div>'+h+'</div>';$('modal').style.display='flex'}function X(){$('modal').style.display='none'}
+function ask(m,fn){A=fn;M(`<p>${m}</p><div class=g><button class="b r" onclick="A();X()">${t('del')}</button><button class="b o" onclick=X()>${t('cancel')}</button></div>`)}
+function save(){try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}}
+function load(){try{const x=JSON.parse(localStorage.getItem(K));if(x&&x.p&&x.s)return x}catch(e){}return seed()}
+function seed(){S={p:[],v:[],m:[],e:[],n:0,s:{name:'Boutik Mwen',addr:'Pòtoprens',tel:'',cur:'HTG',lang:'ht',low:5}};const n=new Date().toISOString();
+[['Pafen','P001','Pafen',100,200,12],['Krèm po','P002','Kosmetik',120,220,6],['Pat cheve','P003','Kosmetik',90,150,12],['Bwòs dan','P004','Higyèn',30,50,6]].forEach((a,i)=>{S.p.push({id:'p'+i,n:a[0],c:a[1],cat:a[2],b:a[3],s:a[4],i:a[5],q:a[5],m:5});S.m.push({d:n,pid:'p'+i,n:a[0],t:'inisyal',q:a[5],note:''})});
+const ago=k=>new Date(Date.now()-864e5*k).toISOString();
+sell([{id:'p0',q:1}],0,'Cash',200,ago(2));sell([{id:'p2',q:1},{id:'p3',q:3}],0,'MonCash',0,ago(1));sell([{id:'p1',q:1}],20,'Cash',200,ago(0));
+S.e.push({id:1,d:ago(1),cat:'transp',amt:100,note:''});save();return S}
+/* Sale: validate everything first, then apply; roll back on any failure */
+function sell(it,disc,pay,rec,dt){dt=dt||new Date().toISOString();if(!it.length)return toast(t('e_empty'));
+let sub=0,cost=0;const L=[];
+for(const l of it){const p=S.p.find(x=>x.id==l.id),q=+l.q;if(!p||!Number.isInteger(q)||q<=0)return toast(t('e_qty'));if(q>p.q)return toast(t('e_stock')+': '+p.n);L.push({id:p.id,n:p.n,q,b:p.b,s:p.s});sub+=q*p.s;cost+=q*p.b}
+disc=+disc||0;if(disc<0||disc>sub)return toast(t('e_disc'));const tot=sub-disc;rec=pay=='Cash'?(+rec||0):tot;if(rec<tot)return toast(t('e_rec'));
+const snap=JSON.stringify(S);
+try{L.forEach(l=>{const p=S.p.find(x=>x.id==l.id);p.q-=l.q;S.m.push({d:dt,pid:p.id,n:p.n,t:'vant',q:-l.q,note:''})});
+const v={no:'R'+String(++S.n).padStart(5,'0'),d:dt,it:L,sub,disc,tot,pay,rec,chg:rec-tot,cost};S.v.unshift(v);save();return v}catch(e){S=JSON.parse(snap);toast('Erè')}}
+const wk=d=>{const x=new Date(d);x.setHours(0,0,0,0);x.setDate(x.getDate()-((x.getDay()+6)%7));return ld(x)};
+const inP=(d,k)=>{const n=new Date();return k=='day'?ld(d)==ld(n):k=='week'?wk(d)==wk(n):ld(d).slice(0,7)==ld(n).slice(0,7)};
+const vs=k=>S.v.filter(v=>inP(v.d,k)),es=k=>S.e.filter(e=>inP(e.d,k));
+function series(kind){const n=new Date(),o=[];for(let i=kind=='d'?6:kind=='w'?3:5;i>=0;i--){let k,l,fn;
+if(kind=='d'){const d=new Date(n);d.setDate(n.getDate()-i);k=ld(d);l=k.slice(8);fn=v=>ld(v.d)==k}
+else if(kind=='w'){const d=new Date(n);d.setDate(n.getDate()-7*i);k=wk(d);l=k.slice(5);fn=v=>wk(v.d)==k}
+else{const d=new Date(n.getFullYear(),n.getMonth()-i,1);k=ld(d).slice(0,7);l=k.slice(5);fn=v=>ld(v.d).slice(0,7)==k}
+o.push([l,sum(S.v.filter(fn),v=>v.tot)])}return o}
+const bars=o=>{const m=Math.max(1,...o.map(x=>x[1]));return'<div class=bars>'+o.map(x=>`<div title="${f(x[1])}">${x[1]?Math.round(x[1]):''}<i style="height:${x[1]/m*75}%"></i>${x[0]}</div>`).join('')+'</div>'};
+const row=(a,b)=>`<div class=row style="padding:6px 0;border-bottom:1px solid var(--bd)"><span>${a}</span><b>${b}</b></div>`;
+const VW={
+dash(){const rev=sum(S.v,v=>v.tot),ex=sum(S.e,e=>e.amt),gp=sum(S.v,v=>v.tot-v.cost),b={};S.v.forEach(v=>v.it.forEach(l=>b[l.n]=(b[l.n]||0)+l.q));
+const bt=Object.entries(b).sort((x,y)=>y[1]-x[1]).slice(0,5),mx=bt[0]?bt[0][1]:1,lo=S.p.filter(p=>p.q>0&&p.q<=p.m).length,oo=S.p.filter(p=>p.q<=0).length;
+const st=(l,v,c)=>`<div class="card st"><span>${t(l)}</span><b class="${c||''}">${v}</b></div>`;
+return`<div class=g>${st('td',f(sum(vs('day'),v=>v.tot)))}${st('wk',f(sum(vs('week'),v=>v.tot)))}${st('mo',f(sum(vs('month'),v=>v.tot)))}${st('rev',f(rev))}${st('expt',f(ex))}${st('pr',f(gp-ex),gp-ex<0?'lo':'')}${st('np',S.p.filter(p=>p.q>0).length)}${st('lw',lo,lo?'lo':'')}${st('oo',oo,oo?'lo':'')}${st('tx',S.v.length)}</div>
+<div class=card><h3>${t('dd')}</h3>${bars(series('d'))}</div><div class=card><h3>${t('dw')}</h3>${bars(series('w'))}</div><div class=card><h3>${t('dm')}</h3>${bars(series('m'))}</div>
+<div class=card><h3>${t('best')}</h3>${bt.map(x=>`<div class=hb><span style="width:110px">${esc(x[0])}</span><i style="width:${Math.round(x[1]/mx*140)}px"></i>${x[1]}</div>`).join('')||t('none')}</div>`},
+pos(){return`<div class=pos><div><input placeholder="${t('srch')}" value="${esc(Q)}" oninput="Q=this.value;drawGrid()"><div class=pg id=pg style="margin-top:8px"></div></div><div class=card id=cart></div></div>`},
+prod(){return`<div class=g><input placeholder="${t('srch')}" value="${esc(Q2)}" oninput="Q2=this.value;pl()"><button class=b onclick=pf()>+ ${t('add')}</button></div><div class=card style="margin-top:10px"><b>${t('val')}: ${f(sum(S.p,p=>p.q*p.b))}</b><div id=pl></div></div>`},
+stk(){const lo=S.p.filter(p=>p.q>0&&p.q<=p.m),oo=S.p.filter(p=>p.q<=0);
+return`<div class="card f"><h3>${t('acha')} / ${t('adj')}</h3><select id=s_p>${S.p.map(p=>`<option value=${p.id}>${esc(p.n)} (${p.q})`).join('')}</select><select id=s_t><option value=acha>${t('acha')}<option value=adj>${t('adj')}</select><input id=s_q type=number step=1 placeholder="${t('qty')}"><input id=s_n placeholder="${t('note')}"><button class=b onclick=sv2()>${t('save')}</button></div>
+<div class=g><div class=card><h3>${t('lw')}</h3>${lo.map(p=>`<div class=row><span>${esc(p.n)}</span><b class=lo>${p.q}</b></div>`).join('')||t('none')}</div><div class=card><h3>${t('oo')}</h3>${oo.map(p=>`<div>${esc(p.n)}</div>`).join('')||t('none')}</div></div>
+<div class="card sc"><h3>${t('mv')}</h3><table><tr><th>${t('date')}<th>${t('name')}<th>Type<th>${t('qty')}<th>${t('note')}</tr>${S.m.slice(-40).reverse().map(m=>`<tr><td>${new Date(m.d).toLocaleDateString('fr-FR')}<td>${esc(m.n)}<td>${t(m.t)}<td>${m.q>0?'+':''}${m.q}<td>${esc(m.note||'')}</tr>`).join('')}</table></div>`},
+his(){return`<div class=g><input placeholder="${t('rno')}" value="${esc(H.no)}" oninput="H.no=this.value;hl()"><input type=date value="${H.d}" onchange="H.d=this.value;hl()"></div><div id=hl class="card sc" style="margin-top:10px"></div>`},
+rep(){const v=vs(RP),e=es(RP),sub=sum(v,x=>x.sub),dc=sum(v,x=>x.disc),tt=sum(v,x=>x.tot),cs=sum(v,x=>x.cost),ex=sum(e,x=>x.amt),gp=tt-cs;
+return`<div class=g>${['day','week','month'].map(k=>`<button class="b ${RP==k?'':'o'}" onclick="RP='${k}';render()">${t(k)}</button>`).join('')}</div><div class=card style="margin-top:10px">${row(t('rev'),f(sub))}${row(t('disc'),f(dc))}${row(t('sales'),f(tt))}${row(t('cost'),f(cs))}${row(t('gross'),f(gp))}${row(t('expt'),f(ex))}${row(t('pr'),'<span class="'+(gp-ex<0?'lo':'')+'">'+f(gp-ex)+'</span>')}</div>`},
+exp(){const c=['transp','elec','rent','sal','other'];
+return`<div class="card f"><select id=x_c>${c.map(k=>`<option value=${k}>${t(k)}`).join('')}</select><input id=x_a type=number min=0 step=any placeholder="${t('amt')}"><input id=x_d type=date value="${ld(new Date())}"><input id=x_n placeholder="${t('note')}"><button class=b onclick=ea()>${t('add').replace(/ .*/,'')}</button></div>
+<div class="card sc"><table><tr><th>${t('date')}<th>${t('cat')}<th>${t('amt')}<th>${t('note')}<th></tr>${S.e.map(e=>`<tr><td>${ld(e.d)}<td>${t(e.cat)}<td>${f(e.amt)}<td>${esc(e.note||'')}<td><button class="b o" onclick="ask(t('delq'),()=>{S.e=S.e.filter(x=>x.id!=${e.id});save();render()})">🗑</button></tr>`).join('')}</table></div>`},
+set(){const s=S.s;return`<div class="card f">${fl('t_n','sname',s.name)}${fl('t_a','addr',s.addr)}${fl('t_t','tel',s.tel)}<label>${t('cu')}<select id=t_c><option ${s.cur=='HTG'?'selected':''}>HTG<option ${s.cur=='USD'?'selected':''}>USD</select></label><label>${t('lang')}<select id=t_l><option value=ht ${s.lang=='ht'?'selected':''}>Kreyòl<option value=fr ${s.lang=='fr'?'selected':''}>Français</select></label>${fl('t_w','lowt',s.low,'number','min=0')}<button class=b onclick=ss()>${t('save')}</button></div>
+<div class="card f"><button class="b o" onclick=bk()>${t('bk')}</button><button class="b o" onclick=rs()>${t('rs')}</button><button class="b r" onclick="ask(t('wipeq'),wp)">${t('wipe')}</button></div>`}};
+function render(){document.documentElement.lang=S.s.lang=='fr'?'fr':'ht';$('nav').innerHTML=NAV.map(k=>`<button class="${V==k?'on':''}" onclick="V='${k}';render()">${t(k)}</button>`).join('');
+$('hn').textContent=S.s.name;$('lg').textContent=S.s.lang=='fr'?'KR':'FR';$('app').innerHTML=VW[V]();
+if(V=='pos'){drawGrid();drawCart()}if(V=='prod')pl();if(V=='his')hl()}
+function tl(){S.s.lang=S.s.lang=='fr'?'ht':'fr';save();render()}
+function drawGrid(){const q=Q.toLowerCase(),a=S.p.filter(p=>(p.n+' '+p.c).toLowerCase().includes(q));
+$('pg').innerHTML=a.map(p=>`<button class=pi ${p.q<=0?'disabled':''} onclick="add('${p.id}')"><b>${esc(p.n)}</b><br>${f(p.s)}<br><small class="${p.q<=p.m?'lo':''}">${t('stk')}: ${p.q}</small></button>`).join('')||t('none')}
+function add(id){const p=S.p.find(x=>x.id==id),l=C.it.find(x=>x.id==id);if(l){if(l.q+1>p.q)return toast(t('e_stock'));l.q++}else C.it.push({id,q:1});drawCart()}
+function sq(id,v){v=parseInt(v);const p=S.p.find(x=>x.id==id);if(!(v>0))C.it=C.it.filter(x=>x.id!=id);else{const l=C.it.find(x=>x.id==id);if(v>p.q){toast(t('e_stock'));v=p.q}l.q=v}drawCart()}
+const cartSub=()=>sum(C.it,l=>{const p=S.p.find(x=>x.id==l.id);return p?l.q*p.s:0});
+function drawCart(){const rows=C.it.map(l=>{const p=S.p.find(x=>x.id==l.id);if(!p)return'';
+return`<div style="margin-bottom:10px"><div class=row><b>${esc(p.n)}</b><span>${f(l.q*p.s)}</span></div><div class=row style="align-items:center"><div style="display:flex;gap:4px;width:170px"><button class="b o" onclick="sq('${p.id}',${l.q-1})">−</button><input type=number min=1 value=${l.q} onchange="sq('${p.id}',this.value)" style="text-align:center"><button class="b o" onclick="sq('${p.id}',${l.q+1})">+</button></div><button class="b o" onclick="sq('${p.id}',0)">✕</button></div></div>`}).join('');
+$('cart').innerHTML=`<h3>🛒</h3>${rows||`<p style="color:var(--mut)">${t('empty')}</p>`}<hr><div class=row><span>${t('sub')}</span><b>${f(cartSub())}</b></div><div class=f><label>${t('disc')}<input type=number min=0 step=any value="${C.disc||''}" oninput="C.disc=+this.value;upd()"></label><label>${t('pay')}<select onchange="C.pay=this.value;upd()">${['Cash','MonCash','NatCash','Other'].map(x=>`<option value=${x} ${C.pay==x?'selected':''}>${pl_(x)}`).join('')}</select></label><label id=rw>${t('rcv')}<input type=number min=0 step=any value="${C.rec}" oninput="C.rec=this.value;upd()"></label></div>
+<div class=row style="font-size:20px;margin-top:8px"><b>${t('tot')}</b><b id=tot></b></div><div class=row><span>${t('chg')}</span><span id=chg></span></div><button class=b style="width:100%;margin-top:10px" onclick=ok()>${t('ok')}</button>`;upd()}
+function upd(){const tt=Math.max(0,cartSub()-(+C.disc||0));$('tot').textContent=f(tt);$('chg').textContent=f(C.pay=='Cash'?Math.max(0,(+C.rec||0)-tt):0);$('rw').style.display=C.pay=='Cash'?'':'none'}
+function ok(){const v=sell(C.it,C.disc,C.pay,C.rec);if(v){C={it:[],disc:0,pay:'Cash',rec:''};showR(v.no);drawGrid();drawCart()}}
+function rc(v){const r=(a,b,s)=>`<div class=row${s||''}><span>${a}</span><span>${b}</span></div>`;
+return`<div id=rcpt class=rc><div style="text-align:center"><b>${esc(S.s.name)}</b><br>${esc(S.s.addr)} ${esc(S.s.tel)}</div><hr>${t('rcn')}: ${v.no}<br>${new Date(v.d).toLocaleString('fr-FR')}<hr>${v.it.map(l=>esc(l.n)+r(l.q+' × '+f(l.s),f(l.q*l.s))).join('')}<hr>${r(t('sub'),f(v.sub))}${v.disc?r(t('disc'),'-'+f(v.disc)):''}${r('<b>'+t('tot')+'</b>','<b>'+f(v.tot)+'</b>')}<hr>${r(t('pay'),pl_(v.pay))}${r(t('rcv'),f(v.rec))}${r(t('chg'),f(v.chg))}<hr><p style="text-align:center">${t('thx')}</p></div>`}
+function showR(no){const v=S.v.find(x=>x.no==no);M(rc(v)+`<div class=g style="margin-top:10px"><button class=b onclick=print()>🖨 ${t('print')}</button><button class="b o" onclick=print()>PDF</button><button class="b o" onclick="shr('${no}')">${t('share')}</button><button class="b o" onclick=X()>${t('nw')}</button></div>`)}
+function shr(no){const v=S.v.find(x=>x.no==no),tx=`${S.s.name}\n${v.no} ${new Date(v.d).toLocaleString('fr-FR')}\n`+v.it.map(l=>`${l.n} ${l.q} × ${f(l.s)}`).join('\n')+`\n${t('tot')}: ${f(v.tot)}\n${t('thx')}`;
+try{navigator.share?navigator.share({text:tx}).catch(()=>{}):navigator.clipboard.writeText(tx).then(()=>toast('✓'))}catch(e){toast('—')}}
+function hl(){const a=S.v.filter(v=>v.no.toLowerCase().includes(H.no.toLowerCase())&&(!H.d||ld(v.d)==H.d));
+$('hl').innerHTML=`<b>${t('rev')}: ${f(sum(a,v=>v.tot))} · ${t('prof')}: ${f(sum(a,v=>v.tot-v.cost))}</b><table><tr><th>${t('rno')}<th>${t('date')}<th>${t('cat').slice(0,0)}${t('qty')}<th>${t('tot')}<th>${t('prof')}</tr>${a.map(v=>`<tr onclick="showR('${v.no}')" style="cursor:pointer"><td>${v.no}<td>${new Date(v.d).toLocaleDateString('fr-FR')}<td>${v.it.map(l=>esc(l.n)+' ×'+l.q).join(', ')}<td>${f(v.tot)}<td>${f(v.tot-v.cost)}</tr>`).join('')||`<tr><td colspan=5>${t('none')}`}</table>`}
+function pl(){const a=S.p.filter(p=>(p.n+' '+p.c).toLowerCase().includes(Q2.toLowerCase()));
+$('pl').innerHTML=`<div class=sc><table><tr><th>${t('name')}<th>${t('code')}<th>${t('cat')}<th>${t('buy')}<th>${t('sell')}<th>${t('cur')}<th>${t('val')}<th></tr>${a.map(p=>`<tr><td>${esc(p.n)}<td>${esc(p.c)}<td>${esc(p.cat)}<td>${f(p.b)}<td>${f(p.s)}<td class="${p.q<=p.m?'lo':''}">${p.q}<td>${f(p.q*p.b)}<td style="white-space:nowrap"><button class="b o" onclick="pf('${p.id}')">✎</button> <button class="b o" onclick="ask(t('delq'),()=>{S.p=S.p.filter(x=>x.id!='${p.id}');save();render()})">🗑</button></tr>`).join('')||`<tr><td colspan=8>${t('none')}`}</table></div>`}
+function pf(id){const p=S.p.find(x=>x.id==id)||{n:'',c:'',cat:'',b:'',s:'',m:S.s.low};
+M(`<h3>${t(id?'edit':'add')}</h3><div class=f>${fl('f_n','name',p.n)}${fl('f_c','code',p.c)}<label>${t('cat')}<input id=f_k list=cats value="${esc(p.cat)}"></label><datalist id=cats>${[...new Set(S.p.map(x=>x.cat))].map(c=>`<option value="${esc(c)}">`).join('')}</datalist>${fl('f_b','buy',p.b,'number','min=0 step=any')}${fl('f_s','sell',p.s,'number','min=0 step=any')}${id?'':fl('f_i','init',0,'number','min=0 step=1')}${fl('f_m','min',p.m,'number','min=0')}<div class=g><button class=b onclick="psv('${id||''}')">${t('save')}</button><button class="b o" onclick=X()>${t('cancel')}</button></div></div>`)}
+function psv(id){const v=i=>$(i).value,n=v('f_n').trim(),c=v('f_c').trim()||('P'+String(S.p.length+1+Math.floor(Math.random()*900)).padStart(3,'0')),b=+v('f_b'),s=+v('f_s'),m=parseInt(v('f_m'))||0,cat=v('f_k').trim();
+if(!n||!(s>0)||v('f_b')===''||b<0)return toast(t('e_price'));if(S.p.some(x=>x.c==c&&x.id!=id))return toast(t('e_code'));
+if(id)Object.assign(S.p.find(x=>x.id==id),{n,c,cat,b,s,m});
+else{const q=parseInt(v('f_i'))||0;if(q<0)return toast(t('e_qty'));const p={id:'p'+Date.now(),n,c,cat,b,s,i:q,q,m};S.p.push(p);S.m.push({d:new Date().toISOString(),pid:p.id,n,t:'inisyal',q,note:''})}
+save();X();render()}
+function sv2(){const p=S.p.find(x=>x.id==$('s_p').value),ty=$('s_t').value,q=parseInt($('s_q').value);if(!p||!q||(ty=='acha'&&q<0))return toast(t('e_qty'));if(p.q+q<0)return toast(t('e_stock'));
+p.q+=q;S.m.push({d:new Date().toISOString(),pid:p.id,n:p.n,t:ty,q,note:$('s_n').value});save();render()}
+function ea(){const a=+$('x_a').value;if(!(a>0))return toast(t('e_price'));S.e.unshift({id:Date.now(),d:($('x_d').value||ld(new Date()))+'T12:00:00',cat:$('x_c').value,amt:a,note:$('x_n').value});save();render()}
+function ss(){Object.assign(S.s,{name:$('t_n').value||'Boutik',addr:$('t_a').value,tel:$('t_t').value,cur:$('t_c').value,lang:$('t_l').value,low:parseInt($('t_w').value)||0});save();render();toast('✓')}
+function wp(){S.p=[];S.v=[];S.m=[];S.e=[];S.n=0;save();render()}
+function bk(){M(`<textarea id=bt rows=10 readonly>${esc(JSON.stringify(S))}</textarea><button class=b style="margin-top:8px" onclick="try{navigator.clipboard.writeText($('bt').value);toast('✓')}catch(e){$('bt').select()}">${t('copy')}</button>`)}
+function rs(){M(`<textarea id=bt rows=8></textarea><button class=b style="margin-top:8px" onclick=rs2()>${t('rs')}</button>`)}
+function rs2(){try{const x=JSON.parse($('bt').value);if(!(x.p&&x.v&&x.s))throw 0;S=x;save();X();render()}catch(e){toast('Erè')}}
+S=load();render();
+</script></body></html>
